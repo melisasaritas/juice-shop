@@ -34,7 +34,7 @@ jobs:
         output-file: "sbom.spdx.json"
         format: "spdx-json"
 
-  Semgrep - SAST:
+  Semgrep-SAST:
     needs: Anchore-Build-Scan
     runs-on: ubuntu-latest
     container: returntocorp/semgrep
