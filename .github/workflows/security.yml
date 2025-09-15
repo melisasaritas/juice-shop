@@ -59,3 +59,31 @@ jobs:
         with:
           name: semgrep-results
           path: semgrep/results/
+
+    Gitleaks-scan:
+      name: Gitleaks (Secret)
+      needs: Semgrep-SAST
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: SecretScan
+          uses: gitleaks/gitleaks-action@v2
+          env:
+            GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
+            GITLEAKS_ENABLE_SUMMARY: true
+          continue-on-error: true
+
+        - name: Upload
+          uses: github/codeql-action/upload-sarif@v3
+          if: always()
+          with:
+            sarif_file: 'results.sarif'
+
+        - name: Upload gitleaks report
+          uses: actions/upload-artifact@v4
+          if: always()
+          with:
+            name: results.sarif
+            path: .
