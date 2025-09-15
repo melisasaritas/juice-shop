@@ -33,3 +33,29 @@ jobs:
         image: "juice-shop:${{ github.sha }}"
         output-file: "sbom.spdx.json"
         format: "spdx-json"
+
+  Semgrep - SAST:
+    needs: Anchore-Build-Scan
+    runs-on: ubuntu-latest
+    container: returntocorp/semgrep
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Semgrep Scan
+        run: |
+         mkdir -p semgrep/results
+         semgrep ci --config=auto --sarif --output=semgrep/results/semgrep.sarif || true
+
+      - name: Upload SARIF File
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'semgrep/results/semgrep.sarif'
+          
+      - name: Upload Semgrep report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: semgrep-results
+          path: semgrep/results/
